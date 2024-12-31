@@ -1,6 +1,6 @@
 import { FaEdit, FaTrash } from "react-icons/fa";
 import CalendarContext from "@/hooks/useCalandarContext"
-import React, { useContext } from "react"
+import React, { useContext, useState } from "react"
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { EventForm } from "../calendar/EventForm";
 import { CalendarContextType, Event } from "@/types";
@@ -9,6 +9,7 @@ import { CalendarContextType, Event } from "@/types";
 export default function Events() {
 
     const { activeDate, events, setEvents, activeMonth, activeYear } = useContext(CalendarContext) as CalendarContextType;
+    const [searchTerm, setSearchTerm] = useState(''); // State for the search input
 
     if (!activeDate) return null;
 
@@ -24,10 +25,23 @@ export default function Events() {
         return a.end_time.localeCompare(b.end_time); // If start times are the same, sort by end time
     });
 
+    const filteredEvents = sortedEvents.filter((event: Event) =>
+        event.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <aside className='flex-[1] overflow-y-auto  h-full p-2 w-full' >
+            <div className="mb-4">
+                <input
+                    type="text"
+                    placeholder="Search by title..."
+                    className="w-full p-2 border rounded-md text-sm bg-white text-gray-800"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)} // Update search term
+                />
+            </div>
             {
-                sortedEvents.map((event: Event, i: number) => (
+                filteredEvents.map((event: Event, i: number) => (
                     <EventCard setEvents={setEvents} activeDate={activeDate} activeMonth={activeMonth} activeYear={activeYear} eventDetails={event} key={i} />
                 ))
             }
